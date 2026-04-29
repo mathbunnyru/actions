@@ -21,9 +21,6 @@ runs:
         echo 'Checking environment variables.'
         env | sort
 
-        echo 'Checking compiler version.'
-        ${{ runner.os == 'Linux' && '${CC}' || 'clang' }} --version
-
         echo 'Checking Ninja version.'
         ninja --version
 
