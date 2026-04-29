@@ -1,0 +1,45 @@
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/test-print-env.yml"
+      - "print-env/**"
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/test-print-env.yml"
+      - "print-env/**"
+  workflow_dispatch:
+  schedule:
+    - cron: "0 8 * * *"
+
+jobs:
+  test-print-env:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: heavy
+            container: '{ "image": "ghcr.io/xrplf/clio-ci:latest" }'
+          - os: heavy-arm64
+            container: '{ "image": "ghcr.io/xrplf/clio-ci:latest" }'
+          - os: heavy
+            container: '{ "image": "ghcr.io/xrplf/ci/debian-trixie:gcc-15" }'
+          - os: heavy-arm64
+            container: '{ "image": "ghcr.io/xrplf/ci/rhel-10:clang-any" }'
+          - os: macos15
+          - os: windows
+
+    runs-on: ${{ matrix.os }}
+    container: ${{ matrix.container != '' && fromJson(matrix.container) || null }}
+
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Prepare runner
+        uses: ./prepare-runner
+        with:
+          enable_ccache: false
+
+      - name: Run print-env action
+        uses: ./print-env
