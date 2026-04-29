@@ -4,37 +4,39 @@ description: "Print environment and some tooling versions"
 runs:
   using: composite
   steps:
-    - name: Check configuration (Windows)
-      if: ${{ runner.os == 'Windows' }}
-      shell: bash
-      run: |
-        echo 'Checking environment variables.'
-        set
-
-    - name: Check configuration (Linux and macOS)
+    - name: Print PATH (Linux and macOS)
       if: ${{ runner.os == 'Linux' || runner.os == 'macOS' }}
       shell: bash
-      run: |
-        echo 'Checking path.'
-        echo ${PATH} | tr ':' '\n'
+      run: echo ${PATH} | tr ':' '\n'
 
-        echo 'Checking environment variables.'
-        env | sort
-
-        echo 'Checking Ninja version.'
-        ninja --version
-
-        echo 'Checking nproc version.'
-        nproc --version
-
-    - name: Check configuration (all)
+    - name: Print environment variables (Windows)
+      if: ${{ runner.os == 'Windows' }}
       shell: bash
-      run: |
-        echo 'Checking Ccache version.'
-        ccache --version
+      run: set
 
-        echo 'Checking CMake version.'
-        cmake --version
+    - name: Print environment variables (Linux and macOS)
+      if: ${{ runner.os == 'Linux' || runner.os == 'macOS' }}
+      shell: bash
+      run: env | sort
 
-        echo 'Checking Conan version.'
-        conan --version
+    - name: Ninja version (Linux and macOS)
+      if: ${{ runner.os == 'Linux' || runner.os == 'macOS' }}
+      shell: bash
+      run: ninja --version
+
+    - name: nproc version (Linux and macOS)
+      if: ${{ runner.os == 'Linux' || runner.os == 'macOS' }}
+      shell: bash
+      run: nproc --version
+
+    - name: Ccache version
+      shell: bash
+      run: ccache --version
+
+    - name: CMake version
+      shell: bash
+      run: cmake --version
+
+    - name: Conan version
+      shell: bash
+      run: conan --version
