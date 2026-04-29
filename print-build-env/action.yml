@@ -1,0 +1,42 @@
+name: Print build environment
+description: "Print environment and some tooling versions"
+
+runs:
+  using: composite
+  steps:
+    - name: Print PATH (Linux and macOS)
+      if: ${{ runner.os == 'Linux' || runner.os == 'macOS' }}
+      shell: bash
+      run: echo ${PATH} | tr ':' '\n'
+
+    - name: Print environment variables (Windows)
+      if: ${{ runner.os == 'Windows' }}
+      shell: bash
+      run: set
+
+    - name: Print environment variables (Linux and macOS)
+      if: ${{ runner.os == 'Linux' || runner.os == 'macOS' }}
+      shell: bash
+      run: env | sort
+
+    - name: Ninja version (Linux and macOS)
+      if: ${{ runner.os == 'Linux' || runner.os == 'macOS' }}
+      shell: bash
+      run: ninja --version
+
+    - name: nproc version (Linux and macOS)
+      if: ${{ runner.os == 'Linux' || runner.os == 'macOS' }}
+      shell: bash
+      run: nproc --version
+
+    - name: Ccache version
+      shell: bash
+      run: ccache --version
+
+    - name: CMake version
+      shell: bash
+      run: cmake --version
+
+    - name: Conan version
+      shell: bash
+      run: conan --version
