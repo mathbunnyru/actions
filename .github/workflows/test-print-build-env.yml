@@ -1,19 +1,19 @@
 on:
   pull_request:
     paths:
-      - ".github/workflows/test-print-env.yml"
-      - "print-env/**"
+      - ".github/workflows/test-print-build-env.yml"
+      - "print-build-env/**"
   push:
     branches: [main]
     paths:
-      - ".github/workflows/test-print-env.yml"
-      - "print-env/**"
+      - ".github/workflows/test-print-build-env.yml"
+      - "print-build-env/**"
   workflow_dispatch:
   schedule:
     - cron: "0 8 * * *"
 
 jobs:
-  test-print-env:
+  test-print-build-env:
     strategy:
       fail-fast: false
       matrix:
@@ -42,4 +42,4 @@ jobs:
           enable_ccache: false
 
       - name: Run print-env action
-        uses: ./print-env
+        uses: ./print-build-env
