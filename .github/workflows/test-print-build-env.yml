@@ -41,5 +41,5 @@ jobs:
         with:
           enable_ccache: false
 
-      - name: Run print-env action
+      - name: Run print-build-env action
         uses: ./print-build-env
