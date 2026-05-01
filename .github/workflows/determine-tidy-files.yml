@@ -1,0 +1,45 @@
+name: Determine clang-tidy files
+
+on:
+  workflow_call:
+    outputs:
+      clang_tidy_config_changed:
+        value: ${{ jobs.determine-tidy-files.outputs.clang_tidy_config_changed }}
+      any_cpp_changed:
+        value: ${{ jobs.determine-tidy-files.outputs.any_cpp_changed }}
+      all_changed_files:
+        value: ${{ jobs.determine-tidy-files.outputs.all_changed_files }}
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  determine-tidy-files:
+    name: Determine files to check
+    runs-on: ubuntu-latest
+    outputs:
+      clang_tidy_config_changed: ${{ steps.changed_clang_tidy_config.outputs.any_changed }}
+      any_cpp_changed: ${{ steps.changed_cpp_files.outputs.any_changed }}
+      all_changed_files: ${{ steps.changed_cpp_files.outputs.all_changed_files }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Get changed C++ files
+        id: changed_cpp_files
+        uses: tj-actions/changed-files@9426d40962ed5378910ee2e21d5f8c6fcbf2dd96 # v47.0.6
+        with:
+          files: |
+            **/*.cpp
+            **/*.h
+            **/*.hpp
+            **/*.ipp
+          separator: " "
+
+      - name: Get changed clang-tidy configuration
+        id: changed_clang_tidy_config
+        uses: tj-actions/changed-files@9426d40962ed5378910ee2e21d5f8c6fcbf2dd96 # v47.0.6
+        with:
+          files: |
+            .clang-tidy
