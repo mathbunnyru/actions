@@ -1,0 +1,39 @@
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/test-release-info.yml"
+      - "release-info/**"
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/test-release-info.yml"
+      - "release-info/**"
+  workflow_dispatch:
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  test-release-info:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Run release-info action
+        id: release_info
+        uses: ./release-info
+
+      # Public repository, never run on a tag, so both outputs are known.
+      - name: Confirm the channel is develop
+        env:
+          CHANNEL: ${{ steps.release_info.outputs.channel }}
+        run: test "${CHANNEL}" = develop
+
+      - name: Confirm the package release is the run number
+        env:
+          PKG_RELEASE: ${{ steps.release_info.outputs.pkg_release }}
+          RUN_NUMBER: ${{ github.run_number }}
+        run: test "${PKG_RELEASE}" = "${RUN_NUMBER}"
