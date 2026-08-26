@@ -10,6 +10,7 @@ updates:
       - /get-nproc/
       - /prepare-runner/
       - /print-build-env/
+      - /release-info/
     schedule:
       interval: weekly
       day: monday
