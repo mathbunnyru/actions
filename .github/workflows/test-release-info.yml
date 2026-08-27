@@ -32,8 +32,11 @@ jobs:
           CHANNEL: ${{ steps.release_info.outputs.channel }}
         run: test "${CHANNEL}" = develop
 
-      - name: Confirm the package release is the run number
+      - name: Confirm the package release names the run, commit date and hash
         env:
           PKG_RELEASE: ${{ steps.release_info.outputs.pkg_release }}
           RUN_NUMBER: ${{ github.run_number }}
-        run: test "${PKG_RELEASE}" = "${RUN_NUMBER}"
+          SHA: ${{ github.sha }}
+        run: |
+          date="$(git log -1 --format=%cs | tr -d -)"
+          test "${PKG_RELEASE}" = "${RUN_NUMBER}.${date}git${SHA:0:7}"

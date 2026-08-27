@@ -6,7 +6,7 @@ outputs:
     description: The release channel this build belongs to
     value: ${{ steps.channel.outputs.channel }}
   pkg_release:
-    description: "The package release number: 1 for a tag, the run number otherwise"
+    description: "The package release number: 1 for a tag, <run number>.<commit date>git<commit hash> otherwise"
     value: ${{ steps.pkg_release.outputs.pkg_release }}
 
 runs:
@@ -43,6 +43,9 @@ runs:
 
         echo "channel=${channel}" | tee -a "${GITHUB_OUTPUT}"
 
+    # A tag's version is unique, so release 1 is enough. Anything else repeats
+    # its version, so the release orders the builds with the run number and
+    # names the packaged commit with its date and hash.
     - name: Determine package release
       id: pkg_release
       shell: bash
@@ -53,7 +56,8 @@ runs:
         if [[ "${IS_TAG}" == "true" ]]; then
             pkg_release=1
         else
-            pkg_release="${RUN_NUMBER}"
+            read -r date sha < <(git log -1 --format='%cs %H')
+            pkg_release="${RUN_NUMBER}.${date//-/}git${sha:0:7}"
         fi
 
         echo "pkg_release=${pkg_release}" | tee -a "${GITHUB_OUTPUT}"
