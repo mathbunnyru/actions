@@ -58,27 +58,35 @@ jobs:
           done
           echo "CCACHE_DIR and CONAN_HOME exist and are writable"
 
-      - name: Verify ccache and conan directories are in the workspace
+      - name: Verify ccache and conan directories are in the runner temp dir
         shell: bash
-        env:
-          WORKSPACE: ${{ github.workspace }}
         run: |
           # Windows uses the other path separator, so compare with the
           # separators normalized.
           norm() { printf '%s' "$1" | tr '\\' '/'; }
 
+          CHECKOUT="$(norm "${GITHUB_WORKSPACE}")"
+
           STATUS=0
           for PAIR in "CCACHE_DIR:.ccache" "CONAN_HOME:.conan2"; do
             VAR="${PAIR%%:*}"
             ACTUAL="$(norm "${!VAR}")"
-            EXPECTED="$(norm "${WORKSPACE}/${PAIR#*:}")"
+            EXPECTED="$(norm "${RUNNER_TEMP}/${PAIR#*:}")"
             if [ "${ACTUAL}" != "${EXPECTED}" ]; then
                 echo "${VAR} is '${ACTUAL}', expected '${EXPECTED}'"
                 STATUS=1
             fi
+            # The checkout is walked by tools such as gcovr, so the caches
+            # must stay outside of it.
+            case "${ACTUAL}/" in
+              "${CHECKOUT}"/*)
+                echo "${VAR} is '${ACTUAL}', which is inside the checkout '${CHECKOUT}'"
+                STATUS=1
+                ;;
+            esac
           done
           [ "${STATUS}" -eq 0 ] || exit 1
-          echo "CCACHE_DIR and CONAN_HOME are in the workspace"
+          echo "CCACHE_DIR and CONAN_HOME are in the runner temp dir, outside the checkout"
 
       # ubuntu-latest is only present to exercise prepare-runner on a bare
       # Linux runner (no container); it does not have cmake/conan/ccache/Rust
