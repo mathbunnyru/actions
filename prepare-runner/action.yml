@@ -166,20 +166,18 @@ runs:
       shell: bash
       run: git config --global --add safe.directory "$PWD"
 
-    - name: Set env variables (Linux and macOS)
-      if: ${{ runner.os == 'Linux' || runner.os == 'macOS' }}
+    # RUNNER_TEMP is emptied by the runner at the start and end of every job, so
+    # the caches are never shared between runs. It is also writable both as root
+    # in a container and as a non-root runner user, and it is outside
+    # GITHUB_WORKSPACE, which tools walking the source tree scan (e.g. gcovr).
+    - name: Set env variables
       shell: bash
       run: |
-        echo "CCACHE_DIR=${{ github.workspace }}/.ccache" >> "${GITHUB_ENV}"
-        echo "CONAN_HOME=${{ github.workspace }}/.conan2" >> "${GITHUB_ENV}"
-
-    # Windows is kept separate, as it needs the other path separator.
-    - name: Set env variables (Windows)
-      if: ${{ runner.os == 'Windows' }}
-      shell: bash
-      run: |
-        echo "CCACHE_DIR=${{ github.workspace }}\.ccache" >> $GITHUB_ENV
-        echo "CONAN_HOME=${{ github.workspace }}\.conan2" >> $GITHUB_ENV
+        # Windows accepts forward slashes too, so normalizing the separator
+        # keeps this identical on every platform.
+        CACHE_ROOT="${RUNNER_TEMP//\\//}"
+        echo "CCACHE_DIR=${CACHE_ROOT}/.ccache" >> "${GITHUB_ENV}"
+        echo "CONAN_HOME=${CACHE_ROOT}/.conan2" >> "${GITHUB_ENV}"
 
     - name: Set CCACHE_DISABLE=1
       if: ${{ inputs.enable_ccache == 'false' }}
